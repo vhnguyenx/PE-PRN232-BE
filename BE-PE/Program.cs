@@ -18,11 +18,21 @@ builder.Services.AddCors(options =>
                 "http://localhost:3000",
                 "http://localhost:3001",
                 "https://localhost:3000",
-                "https://localhost:3001"
+                "https://localhost:3001",
+                "https://pe-prn232-be.onrender.com"
               )
+              .SetIsOriginAllowedToAllowWildcardSubdomains()
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
+    });
+    
+    // Add policy for production that allows any origin (if frontend domain changes)
+    options.AddPolicy("AllowAllOrigins", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
@@ -43,7 +53,9 @@ app.UseSwaggerUI(c =>
 });
 
 // Use CORS - MUST be before UseAuthorization
-app.UseCors("AllowFrontend");
+// Use AllowAllOrigins for production, AllowFrontend for development
+var corsPolicy = app.Environment.IsDevelopment() ? "AllowFrontend" : "AllowAllOrigins";
+app.UseCors(corsPolicy);
 
 // Disable HTTPS redirection in production (Render handles SSL)
 if (app.Environment.IsDevelopment())
