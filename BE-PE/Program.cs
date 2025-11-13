@@ -10,13 +10,19 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+// Enable Swagger for all environments on Render
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "BE-PE API V1");
+    c.RoutePrefix = string.Empty; // Set Swagger UI at app's root
+});
+
+// Disable HTTPS redirection in production (Render handles SSL)
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseHttpsRedirection();
 }
-
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
